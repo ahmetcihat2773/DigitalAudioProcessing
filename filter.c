@@ -59,13 +59,14 @@ int main(int argc, char **argv) {
 	}
 	//printf("%s",argv[1]);
 	// OPEN FILE
-	ptr = fopen(argv[1],"rb");
+	ptr = fopen(argv[1],"rb+");
 	// This function returns a FILE pointer
 	if (ptr == NULL){
 		printf("Error opening file");
 		exit(1);
 	}
 	// START READING
+	
 	read = fread(header.riff,sizeof(header.riff),1,ptr);
 	// 1-4 byte
 	printf("%s\n",header.riff);
@@ -157,6 +158,8 @@ read = fread(buffer2, sizeof(buffer2), 1, ptr);
                 (buffer4[2] << 16) |
                 (buffer4[3] << 24 );
  printf("(41-44) Size of data chunk: %u \n", header.data_size);
+ 
+ /*
  int channel_size = ((int)header.data_size)/2;
  unsigned char left_channel[channel_size];
  unsigned char right_channel[channel_size];
@@ -164,6 +167,7 @@ read = fread(buffer2, sizeof(buffer2), 1, ptr);
  fread(right_channel, sizeof(channel_size), 1, ptr);
  printf("%u",left_channel);
  fseek(ptr,44,SEEK_SET);
+ */
  // 44 den başlayıp sample sayısının yarısını al ve üzerine yaz geri kalanı sağ channel da al yaz .
  
  
@@ -214,13 +218,13 @@ long size_of_each_sample = (header.channels * header.bits_per_sample) / 8;
                     high_limit = 2147483647;
                     break;
             }                  
-            printf("nn.Valid range for data values : %ld to %ld \n", low_limit, high_limit);
-            unsigned char channel_right[bytes_in_each_channel];
-            unsigned char channel_left[bytes_in_each_channel];
+            //printf("nn.Valid range for data values : %ld to %ld \n", low_limit, high_limit);
+            short channel_right[bytes_in_each_channel];
+            short channel_left[bytes_in_each_channel];
             for (i =1; i <= num_samples; i++) {
             	// Each sample has 4 bytes and first two bytes for channel 0 and the second two bytes
             	// for the channel 1, I need to change this two bytes each time with one another.
-                printf("==========Sample %ld / %ld=============\n", i, num_samples);
+                //printf("==========Sample %ld / %ld=============\n", i, num_samples);
                 read = fread(data_buffer, sizeof(data_buffer), 1, ptr);
                 // data_buffer has size of each sample and each sample has two channel which are 2bytes for each channel
                 // in our case.
@@ -228,38 +232,63 @@ long size_of_each_sample = (header.channels * header.bits_per_sample) / 8;
                     // dump the data read
                     unsigned int  xchannels = 0;
                     int data_in_channel = 0;
+                    int data_in_channel_1 = 0;
                     int offset = 0; // move the offset for every iteration in the loop below
-                    int channel_num = 1;
-					for (xchannels = 0; xchannels < header.channels; xchannels ++ ) {
-                        printf("Channel#%d : ", (xchannels+1));
+					//for (xchannels = 0; xchannels < header.channels; xchannels ++ ) {
+                        //printf("Channel#%d : ", (xchannels+1));
                         // convert data from little endian to big endian based on bytes in each channel sample
                         if (bytes_in_each_channel == 4) {					
-							
-							
-							data_in_channel = (data_buffer[offset] & 0x00ff) |
-                                                ((data_buffer[offset + 1] & 0x00ff) <<8) |
-                                                ((data_buffer[offset + 2] & 0x00ff) <<16) |
-                                                (data_buffer[offset + 3]<<24);
-                        }
-                        else if (bytes_in_each_channel == 2) {
-                        	 
+							 read = fseek(ptr,-1*sizeof(data_buffer),SEEK_CUR); 
+							 data_in_channel = (data_buffer[0] & 0x00ff) |
+                                                ((data_buffer[1] & 0x00ff) <<8) |
+                                                ((data_buffer[2] & 0x00ff) <<16) |
+                                                (data_buffer[3]<<24);      
+							  printf("%d\n",data_in_channel);                	 
 							 fread(channel_right, sizeof(channel_right), 1, ptr);
 							 fread(channel_left, sizeof(channel_left), 1, ptr);
-							 fseek(ptr,44+num_samples,SEEK_SET);
-							 
-							 
-                        	
-                            data_in_channel = (data_buffer[offset] & 0x00ff) |
-                                                (data_buffer[offset + 1] << 8);
+							 read = fseek(ptr,-2*bytes_in_each_channel,SEEK_CUR);
+							 read = fwrite(channel_left , 1 , sizeof(channel_left) ,ptr);
+							 read = fwrite(channel_right , 1 , sizeof(channel_right) ,ptr);
+							 //printf("%d",read);
+							 read = fread(data_buffer, sizeof(data_buffer), 1, ptr);
+							data_in_channel = (data_buffer[0] & 0x00ff) |
+                                                ((data_buffer[1] & 0x00ff) <<8) |
+                                                ((data_buffer[2] & 0x00ff) <<16) |
+                                                (data_buffer[3]<<24);
+                            read = fseek(ptr,-1*sizeof(data_buffer),SEEK_CUR); 
+                            printf("%d\n",data_in_channel);  
+                        }
+                        else if (bytes_in_each_channel == 2) {
+
+                            data_in_channel_1 = (data_buffer[0] & 0x00ff) |
+                                                (data_buffer[1] << 8);
+							//printf("SAMPLE:%d:::%d\n",i,data_in_channel);                	 
+                        	 read = fseek(ptr,-1*sizeof(data_buffer),SEEK_CUR); 
+							 read = fread(channel_right, sizeof(channel_right), 1, ptr);
+							 read = fread(channel_left, sizeof(channel_left), 1, ptr);
+							 read = fseek(ptr,-2*bytes_in_each_channel,SEEK_CUR);
+							 read = fwrite(channel_left , 1 , sizeof(channel_left) ,ptr);
+							 read = fwrite(channel_right , 1 , sizeof(channel_right) ,ptr);
+							 read = fseek(ptr,-2*bytes_in_each_channel,SEEK_CUR);
+                        	//printf("%d",read);
+                        	read = fread(data_buffer, sizeof(data_buffer), 1, ptr);
+                            data_in_channel = (data_buffer[0] & 0x00ff) |
+                                                (data_buffer[1] << 8);
+                            //read = fseek(ptr,-1*sizeof(data_buffer),SEEK_CUR); 
+                            //printf("SAMPLE:%d:::%d\n",i,data_in_channel_1);
+							if (data_in_channel != data_in_channel_1){
+								printf("SAMPLE:%d:Channel_0::%d::::Channel_1:::%d\n",i,data_in_channel,data_in_channel_1);
+							}  
+                            
                         }
                         offset += bytes_in_each_channel;       
-                        printf("%d\n", data_in_channel);
+                        //printf("%d\n", data_in_channel);
                         // check if value was in range
                         if (data_in_channel < low_limit || data_in_channel > high_limit)
                             printf("**value out of range\n");
-                        printf(" | ");
-                    }
-                    printf("n");
+                        //printf(" | ");
+                    //}
+                    //printf("\n");
                 }
                 else {
                     printf("Error reading file. %d bytesn", read);
@@ -270,8 +299,8 @@ long size_of_each_sample = (header.channels * header.bits_per_sample) / 8;
      } // if (c == 'Y' || c == 'y') {
  } //  if (header.format_type == 1) {
 
- 
- 
+
+
  
  
  	fclose(ptr);
