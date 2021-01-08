@@ -8,4 +8,4 @@ This program changes the two channels in storeo wav file into one another. You c
 Here the output.wav is the output file in which channels are changed and the input file is the source wav file. 
 
 You can see the change of wav file channels in the given image below.
-! [Rigth channel of input"BLUE" Right channel of output"Red"](https://github.com/ahmetcihat2773/changeChannels/blob/main/Capture.PNG)
+![Rigth channel of input"ORANGE" Right channel of output"Red"](https://github.com/ahmetcihat2773/changeChannels/blob/main/Capture.PNG)
