@@ -7,5 +7,5 @@ This program changes the two channels in storeo wav file into one another. You c
 
 Here the output.wav is the output file in which channels are changed and the input file is the source wav file. 
 
-You can see the change of wav file channels in the given image below.
+Normally signals should be the same since the two signal is taken from right channels of the wav files however I have changed them that's why there are some voltage differences which can be seen in the figure below.
 ![Rigth channel of input"ORANGE" Right channel of output"Red"](https://github.com/ahmetcihat2773/changeChannels/blob/main/Capture.PNG)
