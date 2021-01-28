@@ -171,7 +171,7 @@ long size_of_each_sample = (header.channels * header.bits_per_sample) / 8;
  printf("Approx.Duration in seconds=%f \n", duration_in_seconds);
  printf("Approx.Duration in h:m:s=%s \n", seconds_to_time(duration_in_seconds));
  long bytes_in_each_channel = (size_of_each_sample / header.channels);
-
+int byt_read;
  if (header.format_type == 1) {
         long i =0;
         long bytes_in_each_channel = (size_of_each_sample / header.channels);
@@ -185,6 +185,10 @@ long size_of_each_sample = (header.channels * header.bits_per_sample) / 8;
 			fwrite(channel_0 , 1 , sizeof(channel_0) ,ptr_1);   							      
         }     
      }
+     do{
+     	byt_read = fread(buffer2,sizeof(buffer2),1,ptr);
+     	fwrite(buffer2, 1 , sizeof(buffer2) ,ptr_1);     	
+	 }while(byt_read>0);
  	fclose(ptr_1);
  	free(argv[2]);
  	fclose(ptr);
