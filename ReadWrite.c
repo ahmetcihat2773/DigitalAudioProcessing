@@ -163,24 +163,23 @@ float duration_in_seconds = (float) header.overall_size / header.byterate;
 long bytes_in_each_channel = (size_of_each_sample / header.channels);
 
 long i =0;
-int8_t channel_0;
-int8_t channel_1;
+int16_t channel_0;
+int16_t channel_1;
 printf("SIZE OF EACH SAMPLE : %d\n",size_of_each_sample);
 printf("BYTES IN EACH CHANNEL : %d\n",bytes_in_each_channel);
 printf("NUMBER OF SAMPLES : %d\n",num_samples);
-
+// Each left channel and right channel samples instance is 2bytes.
  if (header.format_type == 1) {		
 	for (i =1; i <= num_samples; i++) {  
-		// Read data as  int8_t for channel_0
+		// Read data as  int16_t for channel_0
 		read = fread(&channel_0, sizeof(channel_0), 1, ptr);
-		// Read data as int8_t for channel_1	
+		// Read data as int16_t for channel_1	
 		read = fread(&channel_1, sizeof(channel_1), 1, ptr);
-		fwrite(&channel_0,1,1,ptr_1);
-		fwrite(&channel_1,1,1,ptr_1);
+		fwrite(&channel_0,size_of_each_sample,1,ptr_1);
+		fwrite(&channel_1,size_of_each_sample,1,ptr_1);
 		// What I see is each sample is 1byte I dont know why
+		}
 }
-
-	}
 	
 	fclose(ptr_1);
  	free(argv[2]);
@@ -189,4 +188,3 @@ printf("NUMBER OF SAMPLES : %d\n",num_samples);
 	return 0;
 
 }
-
