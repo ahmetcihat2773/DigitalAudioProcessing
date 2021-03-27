@@ -234,7 +234,6 @@ channel_zero_filter = (int16_t*)malloc(num_samples*sizeof(int16_t));
 channel_one_filter= (int16_t*)malloc(num_samples*sizeof(int16_t));	
 
 fir_filter(channel_zero,num_samples,channel_zero_filter);
-printf("BEFORE FILTER");
 fir_filter(channel_one,num_samples,channel_one_filter);
 int k;
 for (k = 0; k < (num_samples-1); k++)  //  position in output
