@@ -72,15 +72,18 @@ for (k = 0; k < num_samples-1; k++)
 	input = input_signal[k];
 								
 	for(i=0;i<MWSPT_NSEC;i++){		
-		temp = (float)shift_register[i][1]/32768.0f; 
+	// Here the shift register logic is implemented. Each structure has its own shift register according to this website
+	// https://www.keil.com/pack/doc/CMSIS/DSP/html/group__BiquadCascadeDF1.html  It is implemented accordingly. 
+		
+		temp = (float)shift_register[i][1]/32768.0f; 		
 		shift_register[i][1] = (float)shift_register[i][0]/32768.0f;
 		shift_register[i][2] = temp; 
-		shift_register[i][0] = input - a[i][1]*shift_register[i][1] - a[i][2]*shift_register[i][2];
+		shift_register[i][0] = input - a[i][1]*shift_register[i][1] - a[i][2]*shift_register[0][2];
 		y = b[i][0]*shift_register[i][0] + b[i][1]*shift_register[i][1] + b[i][0]*shift_register[i][2];	
 		input = y;
 	
 	}
-
+	
 channel_filter [k] = int16_sat(input*32768);
 
 }
@@ -237,20 +240,13 @@ channel_one_filter= (int16_t*)malloc(num_samples*sizeof(int16_t));
 iir_filter(channel_zero,num_samples,channel_zero_filter);
 iir_filter(channel_one,num_samples,channel_one_filter);
 int k;
+
 for (k = 0; k < (num_samples-1); k++)  //  position in output
 {
 	//printf("AFTER FILTER : %d",channel_zero_filter[k]);
 	fwrite(&channel_zero_filter[k],size_of_each_sample,1, ptr_1);
 	fwrite(&channel_one_filter[k],size_of_each_sample,1, ptr_1);
 }
-
-// After writing the data, write the rest of the file.
- /*
- do{
- 	byt_read = fread(buffer2,sizeof(buffer2),1,ptr);
- 	fwrite(buffer2, 1 , sizeof(buffer2) ,ptr_1);     	
- }while(byt_read>0);
-*/
 
 
 fclose(ptr_1);
